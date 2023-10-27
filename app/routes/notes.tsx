@@ -1,4 +1,5 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
+import type { Note, User } from "@prisma/client";
 import { json } from "@remix-run/node";
 import { Form, Link, NavLink, Outlet, useLoaderData } from "@remix-run/react";
 
@@ -8,14 +9,14 @@ import { useUser } from "~/utils";
 import logo from "public/logo.svg";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const userId = await requireUserId(request);
-  const noteListItems = await getNoteListItems({ userId });
+  const userId: string = await requireUserId(request);
+  const noteListItems: Partial<Note>[] = await getNoteListItems({ userId });
   return json({ noteListItems });
 };
 
 export default function NotesPage() {
   const data = useLoaderData<typeof loader>(); // current user notes' list
-  const user = useUser();
+  const user: User = useUser();
 
   return (
     <div className="flex h-full min-h-screen flex-col">

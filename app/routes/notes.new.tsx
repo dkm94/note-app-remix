@@ -1,17 +1,19 @@
+import type { RefObject} from "react";
+import { useEffect, useRef } from "react";
+import type { Note } from "@prisma/client";
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-import { useEffect, useRef } from "react";
 
 import { createNote } from "~/models/note.server";
 import { requireUserId } from "~/session.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const userId = await requireUserId(request);
+  const userId: string = await requireUserId(request);
 
   const formData = await request.formData();
-  const title = formData.get("title");
-  const body = formData.get("body");
+  const title: string = formData.get("title");
+  const body: string = formData.get("body");
 
   if (typeof title !== "string" || title.length === 0) {
     return json(
@@ -27,15 +29,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     );
   }
 
-  const note = await createNote({ body, title, userId });
+  const note: Note = await createNote({ body, title, userId });
 
   return redirect(`/notes/${note.id}`);
 };
 
 export default function NewNotePage() {
   const actionData = useActionData<typeof action>();
-  const titleRef = useRef<HTMLInputElement>(null);
-  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const titleRef: RefObject<HTMLInputElement> = useRef<HTMLInputElement>(null);
+  const bodyRef: RefObject<HTMLTextAreaElement> = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (actionData?.errors?.title) {

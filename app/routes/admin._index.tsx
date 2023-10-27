@@ -1,14 +1,16 @@
+import type { Note, Prisma } from "@prisma/client";
 import { json, redirect } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
+
 import { deleteAllNotes, getAllUsersNotes } from "~/models/note.server";
 
 export const loader = async () => {
-    const noteListItems = await getAllUsersNotes();
+    const noteListItems: Partial<Note>[] = await getAllUsersNotes();
     return json({ noteListItems });
   };
 
 export const action = async () => {
-    const deletedNotes = await deleteAllNotes();
+    const deletedNotes: Prisma.BatchPayload = await deleteAllNotes();
     if(deletedNotes?.count === 0) {
         return json({ message: "Failed to delete resource(s)" }, { status: 400 });
     }

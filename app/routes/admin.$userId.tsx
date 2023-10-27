@@ -1,3 +1,4 @@
+import type { Note, Prisma, User } from "@prisma/client";
 import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
@@ -9,7 +10,7 @@ import { requireUser, requireUserId } from "~/session.server";
 export const loader = async ({ params }: LoaderFunctionArgs) => {
     invariant(params.userId, "userId not found");
 
-    const notes = await getNoteListItems({ userId: params.userId });
+    const notes: Partial<Note>[] = await getNoteListItems({ userId: params.userId });
     if (!notes) {
       throw new Response("Not Found", { status: 404 });
     }
@@ -21,18 +22,18 @@ export const action = async ({ params, request }: LoaderFunctionArgs) => {
   let { _action, ...values } = Object.fromEntries(formData);
 
   if(_action === "deleteAll") {
-    const res = await deleteUserNotes({
+    const res: Prisma.BatchPayload = await deleteUserNotes({
       userId: params.userId
     });
 
-    if(!res) {
+    if(res.count === 0) {
       return json({ message: "Failed to delete resource(s)" }, { status: 400 });
     }
     return redirect(`/admin/${params.userId}`);
   }
 
   if(_action === "delete") {
-    const user = await requireUser(request);
+    const user: User = await requireUser(request);
 
     if(user?.id !== values.userId && !user.admin) {
       return json({ message: "Unauthorized" }, { status: 401 });
@@ -50,7 +51,7 @@ export const action = async ({ params, request }: LoaderFunctionArgs) => {
   }
 
   if(_action === "save") {
-    const userId = await requireUserId(request);
+    const userId: string = await requireUserId(request);
     invariant(values.noteId, "noteId not found");
 
     if (typeof values.title !== "string" || values.title.length === 0) {
@@ -67,14 +68,14 @@ export const action = async ({ params, request }: LoaderFunctionArgs) => {
       );
     }
 
-    const res = await updateNote({
+    const res: Prisma.BatchPayload  = await updateNote({
       id: values.noteId,
       userId,
       title: values.title.trim(),
       body: values.body.trim()
     });
 
-    if(!res) {
+    if(res.count === 0) {
       return json({ message: "Failed to update resource(s)" }, { status: 400 });
     }
 
@@ -112,7 +113,7 @@ export default function UserNotesFromAdminPage() {
   const handleEditNote = (noteId: string) => ():void => {
     setNoteId(noteId);
     if(noteId){
-      const selectedNote = user.notes?.find((note) => note.id === noteId);
+      const selectedNote: Note = user.notes?.find((note) => note.id === noteId);
       setTitle(selectedNote?.title);
       setBody(selectedNote?.body);
     }

@@ -1,3 +1,4 @@
+import type { User } from "@prisma/client";
 import { Form, Link, NavLink, Outlet, useLoaderData } from '@remix-run/react';
 import { redirect, type LoaderFunctionArgs, json } from '@remix-run/node';
 
@@ -6,11 +7,13 @@ import { getAllUsers } from '~/models/user.server';
 import { useUser } from '~/utils';
 import logo from "public/logo.svg";
 
+type UserResponse = User | null;
+
 export async function loader({ request }: LoaderFunctionArgs) {
-  const user = await getUser(request);
+  const user: UserResponse = await getUser(request);
   if (!user?.admin) return redirect("/notes");
 
-  const users = await getAllUsers();
+  const users: Partial<User>[] = await getAllUsers();
   if(!users) {
     return json({ message: "Failed to fetch resource(s)" }, { status: 400 });
   }
@@ -19,7 +22,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Admin() {
   const data = useLoaderData<typeof loader>();
-  const user = useUser();
+  const user: User = useUser();
   
   return (
     <div className="flex h-full min-h-screen flex-col">

@@ -1,3 +1,5 @@
+import type { RefObject } from "react";
+import { useEffect, useRef } from "react";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -5,25 +7,25 @@ import type {
 } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
-import { useEffect, useRef } from "react";
 
+import type { User } from "~/models/user.server";
 import { verifyLogin } from "~/models/user.server";
 import { createUserSession, getUserId } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
 import logo from "public/logo.svg";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const userId = await getUserId(request);
+  const userId: string | undefined = await getUserId(request);
   if (userId) return redirect("/");
   return json({});
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const email = formData.get("email");
-  const password = formData.get("password");
-  const redirectTo = safeRedirect(formData.get("redirectTo"), "/");
-  const remember = formData.get("remember");
+  const email: string = formData.get("email");
+  const password: string = formData.get("password");
+  const redirectTo: string = safeRedirect(formData.get("redirectTo"), "/");
+  const remember: string = formData.get("remember");
 
   if (!validateEmail(email)) {
     return json(
@@ -46,7 +48,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     );
   }
 
-  const user = await verifyLogin(email, password);
+  const user:  User | null = await verifyLogin(email, password);
 
   if (!user) {
     return json(
@@ -67,10 +69,10 @@ export const meta: MetaFunction = () => [{ title: "Login" }];
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/notes";
+  const redirectTo: string = searchParams.get("redirectTo") || "/notes";
   const actionData = useActionData<typeof action>();
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
+  const emailRef: RefObject<HTMLInputElement> = useRef<HTMLInputElement>(null);
+  const passwordRef: RefObject<HTMLInputElement> = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (actionData?.errors?.email) {

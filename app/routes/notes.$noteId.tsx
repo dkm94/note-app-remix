@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import type { User } from "@prisma/client";
+import type { Note, User } from "@prisma/client";
 import {
   Form,
   Link,
@@ -17,7 +17,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const user: User = await requireUser(request);
   invariant(params.noteId, "noteId not found");
 
-  const note = await getNote({ id: params.noteId });
+  const note: Partial<Note> | null = await getNote({ id: params.noteId });
   if (!note) {
     throw new Response("Not Found", { status: 404 });
   }

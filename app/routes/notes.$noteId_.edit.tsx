@@ -1,15 +1,17 @@
+import { useState } from "react";
+import type { Note, Prisma } from "@prisma/client";
 import type { ActionFunctionArgs, LoaderFunctionArgs} from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
-import { useState } from "react";
 import invariant from "tiny-invariant";
+
 import { getNote, updateNote } from "~/models/note.server";
 import { requireUserId } from "~/session.server";
 
-export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
     invariant(params.noteId, "noteId not found");
   
-    const note = await getNote({ id: params.noteId });
+    const note: Partial<Note> | null = await getNote({ id: params.noteId });
     if (!note) {
       throw new Response("Not Found", { status: 404 });
     }
@@ -25,7 +27,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     }
     
     if(_action === "save") {
-      const userId = await requireUserId(request);
+      const userId: string = await requireUserId(request);
       invariant(values.noteId, "noteId not found");
   
       if (typeof values.title !== "string" || values.title.length === 0) {
@@ -42,14 +44,14 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
         );
       }
   
-      const res = await updateNote({
+      const res: Prisma.BatchPayload = await updateNote({
         id: values.noteId,
         userId,
         title: values.title.trim(),
         body: values.body.trim()
       });
   
-      if(!res) {
+      if(res.count === 0) {
         return json({ message: "Failed to update resource(s)" }, { status: 400 });
       }
   

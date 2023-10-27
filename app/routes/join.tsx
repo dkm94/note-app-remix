@@ -1,3 +1,5 @@
+import type { RefObject } from "react";
+import { useEffect, useRef } from "react";
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -5,24 +7,27 @@ import type {
 } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
-import { useEffect, useRef } from "react";
 
+import type { User } from "~/models/user.server";
 import { createUser, getUserByEmail } from "~/models/user.server";
 import { createUserSession, getUserId } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
 import logo from "public/logo.svg";
 
+type UserId = string | undefined;
+type ExistingUser = User | null; 
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const userId = await getUserId(request);
+  const userId: UserId = await getUserId(request);
   if (userId) return redirect("/");
   return json({});
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const email = formData.get("email");
-  const password = formData.get("password");
-  const redirectTo = safeRedirect(formData.get("redirectTo"), "/");
+  const email: string = formData.get("email");
+  const password: string = formData.get("password");
+  const redirectTo: string = safeRedirect(formData.get("redirectTo"), "/");
 
   if (!validateEmail(email)) {
     return json(
@@ -45,7 +50,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     );
   }
 
-  const existingUser = await getUserByEmail(email);
+  const existingUser: ExistingUser = await getUserByEmail(email);
   if (existingUser) {
     return json(
       {
@@ -58,7 +63,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     );
   }
 
-  const user = await createUser(email, password);
+  const user: User = await createUser(email, password);
 
   return createUserSession({
     redirectTo,
@@ -72,10 +77,10 @@ export const meta: MetaFunction = () => [{ title: "Sign Up" }];
 
 export default function Join() {
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") ?? undefined;
+  const redirectTo: string | undefined = searchParams.get("redirectTo") ?? undefined;
   const actionData = useActionData<typeof action>();
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
+  const emailRef: RefObject<HTMLInputElement> = useRef<HTMLInputElement>(null);
+  const passwordRef: RefObject<HTMLInputElement> = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (actionData?.errors?.email) {
