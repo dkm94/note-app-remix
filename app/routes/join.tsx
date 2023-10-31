@@ -23,10 +23,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({});
 };
 
+type FormDataEntry = FormDataEntryValue | null;
+
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const formData = await request.formData();
-  const email: string = formData.get("email");
-  const password: string = formData.get("password");
+  const formData: FormData = await request.formData();
+  const email: FormDataEntry = formData.get("email");
+  const password: FormDataEntry = formData.get("password");
   const redirectTo: string = safeRedirect(formData.get("redirectTo"), "/");
 
   if (!validateEmail(email)) {

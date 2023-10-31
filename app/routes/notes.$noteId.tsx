@@ -31,7 +31,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  let formData = await request.formData();
+  const formData: FormData = await request.formData();
   let { _action, ...values } = Object.fromEntries(formData);
   
   if(_action === "delete") {
@@ -42,7 +42,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     await deleteNote({
-      id: values.noteId
+      id: values.noteId.toString(),
     });
 
     return redirect("/notes");
@@ -54,16 +54,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function NoteDetailsPage() {
-  const data = useLoaderData<typeof loader>();
+  const { note } = useLoaderData<typeof loader>();
 
   return (
     <div>
-      <h3 className="text-2xl font-bold">{data?.note?.title}</h3>
-      <p className="py-6">{data?.note?.body}</p>
+      <h3 className="text-2xl font-bold">{note?.title}</h3>
+      <p className="py-6">{note?.body}</p>
       
       <hr className="my-4" />
       <Form method="post">
-        <input type="hidden" name="noteId" value={data?.note?.id} />
+        <input type="hidden" name="noteId" value={note?.id} />
+        <input type="hidden" name="userId" value={note?.userId} />
         <button
           type="submit"
           name="_action"
@@ -75,7 +76,7 @@ export default function NoteDetailsPage() {
       </Form>
 
       <Form method="post">
-        <input type="hidden" name="noteId" value={data?.note?.id} />
+        <input type="hidden" name="noteId" value={note?.id} />
         <button
             type="submit"
             name="_action"

@@ -18,7 +18,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   };
 
 export const action = async ({ params, request }: LoaderFunctionArgs) => {
-  let formData = await request.formData();
+  const formData: FormData = await request.formData();
   let { _action, ...values } = Object.fromEntries(formData);
 
   if(_action === "deleteAll") {
@@ -40,7 +40,7 @@ export const action = async ({ params, request }: LoaderFunctionArgs) => {
     }
 
     await deleteNote({
-      id: values.noteId
+      id: values.noteId.toString()
     });
 
     return redirect(`/admin/${values.userId}`);
@@ -69,7 +69,7 @@ export const action = async ({ params, request }: LoaderFunctionArgs) => {
     }
 
     const res: Prisma.BatchPayload  = await updateNote({
-      id: values.noteId,
+      id: values.noteId.toString(),
       userId,
       title: values.title.trim(),
       body: values.body.trim()

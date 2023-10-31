@@ -20,12 +20,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({});
 };
 
+type FormDataEntry = FormDataEntryValue | null;
+
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const formData = await request.formData();
-  const email: string = formData.get("email");
-  const password: string = formData.get("password");
-  const redirectTo: string = safeRedirect(formData.get("redirectTo"), "/");
-  const remember: string = formData.get("remember");
+  const formData: FormData = await request.formData();
+  const email: FormDataEntry = formData.get("email");
+  const password: FormDataEntry = formData.get("password");
+  const redirectTo: FormDataEntry = safeRedirect(formData.get("redirectTo"), "/");
+  const remember: FormDataEntry = formData.get("remember");
 
   if (!validateEmail(email)) {
     return json(
@@ -68,9 +70,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export const meta: MetaFunction = () => [{ title: "Login" }];
 
 export default function LoginPage() {
+  const actionData = useActionData<typeof action>();
   const [searchParams] = useSearchParams();
   const redirectTo: string = searchParams.get("redirectTo") || "/notes";
-  const actionData = useActionData<typeof action>();
+
   const emailRef: RefObject<HTMLInputElement> = useRef<HTMLInputElement>(null);
   const passwordRef: RefObject<HTMLInputElement> = useRef<HTMLInputElement>(null);
 

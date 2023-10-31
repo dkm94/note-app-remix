@@ -1,4 +1,4 @@
-import type { RefObject} from "react";
+import type { RefObject } from "react";
 import { useEffect, useRef } from "react";
 import type { Note } from "@prisma/client";
 import type { ActionFunctionArgs } from "@remix-run/node";
@@ -8,12 +8,14 @@ import { Form, useActionData } from "@remix-run/react";
 import { createNote } from "~/models/note.server";
 import { requireUserId } from "~/session.server";
 
+type FormDataEntry = FormDataEntryValue | null;
+
 export const action = async ({ request }: ActionFunctionArgs) => {
   const userId: string = await requireUserId(request);
 
-  const formData = await request.formData();
-  const title: string = formData.get("title");
-  const body: string = formData.get("body");
+  const formData: FormData = await request.formData();
+  const title: FormDataEntry = formData.get("title");
+  const body: FormDataEntry = formData.get("body");
 
   if (typeof title !== "string" || title.length === 0) {
     return json(
@@ -36,6 +38,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function NewNotePage() {
   const actionData = useActionData<typeof action>();
+  
   const titleRef: RefObject<HTMLInputElement> = useRef<HTMLInputElement>(null);
   const bodyRef: RefObject<HTMLTextAreaElement> = useRef<HTMLTextAreaElement>(null);
 

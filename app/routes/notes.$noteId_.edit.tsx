@@ -19,9 +19,10 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   };
   
   export const action = async ({ request, params }: ActionFunctionArgs) => {
-    let formData = await request.formData();
-    let { _action, ...values } = Object.fromEntries(formData);
-    
+    const formData: FormData = await request.formData();
+    const entries = Array.from(formData.entries());
+    let { _action, ...values } = Object.fromEntries(entries);
+
     if(_action === "cancel") {
       return redirect(`/notes/${values.noteId}`);
     }
@@ -45,12 +46,12 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
       }
   
       const res: Prisma.BatchPayload = await updateNote({
-        id: values.noteId,
+        id: values.noteId.toString(),
         userId,
-        title: values.title.trim(),
-        body: values.body.trim()
+        title: values.title.toString().trim(),
+        body: values.body.toString().trim()
       });
-  
+
       if(res.count === 0) {
         return json({ message: "Failed to update resource(s)" }, { status: 400 });
       }
