@@ -16,6 +16,16 @@ declare global {
       login: typeof login;
 
       /**
+       * Logs as admin.
+       *
+       * @returns {typeof loginAsAdmin}
+       * @memberof Chainable
+       * @example
+       *    cy.loginAsAdmin()
+       */
+      loginAsAdmin: typeof loginAsAdmin;
+
+      /**
        * Deletes the current @user
        *
        * @returns {typeof cleanupUser}
@@ -43,11 +53,11 @@ declare global {
 }
 
 function login({
-  email = faker.internet.email(undefined, undefined, "example.com"),
-}: {
-  email?: string;
+  email = faker.internet.email(undefined, undefined, "example.com"), // get a fake email
+}: { // define the login function
+  email?: string; // optional email
 } = {}) {
-  cy.then(() => ({ email })).as("user");
+  cy.then(() => ({ email })).as("user"); // save the user to the cypress context
   cy.exec(
     `npx ts-node --require tsconfig-paths/register ./cypress/support/create-user.ts "${email}"`,
   ).then(({ stdout }) => {
@@ -55,8 +65,28 @@ function login({
       .replace(/.*<cookie>(?<cookieValue>.*)<\/cookie>.*/s, "$<cookieValue>")
       .trim();
     cy.setCookie("__session", cookieValue);
-  });
-  return cy.get("@user");
+  }); // create a user and set the cookie
+  return cy.get("@user"); // return the user
+}
+
+function loginAsAdmin({
+  email = "candidat@may.fr",
+  password = "flexiblebenefits",
+}: { // define the login function
+  email?: string; // optional email
+  password?: string; // optional password
+} = {}) {
+  cy.then(() => ({ email, password })).as("user"); // save the user to the cypress context
+  cy.exec(
+    `npx ts-node --require tsconfig-paths/register ./cypress/support/login-user.ts "${password} ${email}"`,
+  )
+  .then(({ stdout }) => {
+    const cookieValue = stdout
+      .replace(/.*<cookie>(?<cookieValue>.*)<\/cookie>.*/s, "$<cookieValue>")
+      .trim();
+    cy.setCookie("__session", cookieValue);
+  }); // create a user and set the cookie
+  return cy.get("@user"); // return the user
 }
 
 function cleanupUser({ email }: { email?: string } = {}) {
@@ -70,7 +100,7 @@ function cleanupUser({ email }: { email?: string } = {}) {
       }
     });
   }
-  cy.clearCookie("__session");
+  cy.clearCookie("__session"); // clear the cookie
 }
 
 function deleteUserByEmail(email: string) {
@@ -86,10 +116,11 @@ function deleteUserByEmail(email: string) {
 // https://github.com/cypress-io/cypress/issues/7306#issuecomment-1152752612
 // ===========================================================
 function visitAndCheck(url: string, waitTime: number = 1000) {
-  cy.visit(url);
-  cy.location("pathname").should("contain", url).wait(waitTime);
+  cy.visit(url); // visit the url
+  cy.location("pathname").should("contain", url).wait(waitTime); // wait for the page to load
 }
 
 Cypress.Commands.add("login", login);
+Cypress.Commands.add("loginAsAdmin", loginAsAdmin);
 Cypress.Commands.add("cleanupUser", cleanupUser);
 Cypress.Commands.add("visitAndCheck", visitAndCheck);

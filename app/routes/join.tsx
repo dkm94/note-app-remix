@@ -29,6 +29,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData: FormData = await request.formData();
   const email: FormDataEntry = formData.get("email");
   const password: FormDataEntry = formData.get("password");
+  const admin: boolean = false;
   const redirectTo: string = safeRedirect(formData.get("redirectTo"), "/");
 
   if (!validateEmail(email)) {
@@ -65,7 +66,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     );
   }
 
-  const user: User = await createUser(email, password);
+  const user: User = await createUser(email, password, admin);
 
   return createUserSession({
     redirectTo,

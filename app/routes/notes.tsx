@@ -17,6 +17,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export default function NotesPage() {
   const data = useLoaderData<typeof loader>(); // current user notes' list
   const user: User = useUser();
+  console.log("🚀 ~ file: notes.tsx:20 ~ NotesPage ~ user:", user)
 
   return (
     <div className="flex h-full min-h-screen flex-col">
@@ -28,6 +29,7 @@ export default function NotesPage() {
           </h1>
         </div>
         <p>{user.email}</p>
+        { user?.admin === true && <Link to="/admin" className="rounded text-black bg-orange-500 px-4 py-2 hover:bg-orange-700 active:bg-orange-300">Admin view</Link>}
         <Form action="/logout" method="post">
           <button
             type="submit"
