@@ -40,11 +40,21 @@ describe(('admin tests'), () => {
         cy.findByRole("textbox", { name: /body/i }).type(testNote.body); // type the body into the body field
         cy.findByRole("button", { name: /save/i }).click();
         
+        cy.findByRole("link", { name: /notes/i }).wait(2000)
+
         cy.findByRole("link", { name: /admin view/i }).click();
 
-        // cy.findByRole("button", { name: /delete all notes/i }).should('be.enabled');
-        // cy.findByRole("button", { name: /delete all notes/i }).click();
-        // cy.findByRole("button", { name: /delete all notes/i }).should('be.disabled');
+        cy.findByRole("button", { name: /delete all notes/i }).should('be.enabled');
+        cy.findByRole("button", { name: /delete all notes/i }).click();
 
+        cy.location("pathname").should("equal", "/notes");
       });
+
+      it("should allow admin to delete a note from another user", () => {
+
+      })
+
+      it("should allow admin to delete all notes from another user", () => {
+        
+      })
 });

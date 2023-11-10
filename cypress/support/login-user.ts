@@ -9,23 +9,19 @@ import { parse } from "cookie";
 
 import { verifyLogin } from "~/models/user.server";
 import { createUserSession } from "~/session.server";
-import * as readline from "readline";
 
 installGlobals();
 
 async function login(credentials: string) {
   const splitValues = credentials.split(' ');
-  console.log("🚀 ~ file: login-user.ts:18 ~ login ~ splitValues:", splitValues)
   const email = splitValues[1];
-  // console.log("🚀 ~ file: login-user.ts:19 ~ login ~ email:", email)
   const password = splitValues[0];
-  // console.log("🚀 ~ file: login-user.ts:21 ~ login ~ password:", password)
+
   if (!email) {
     throw new Error("email required for login");
   }
 
   const user = await verifyLogin(email, password);
-  // console.log("🚀 ~ file: login-user.ts:22 ~ login ~ verifyLogin:", user)
 
     const response = user && await createUserSession({
         request: new Request("test://test"),
@@ -39,8 +35,7 @@ async function login(credentials: string) {
     throw new Error("Cookie missing from createUserSession response");
   }
   const parsedCookie = parse(cookieValue);
-  // we log it like this so our cypress command can parse it out and set it as
-  // the cookie value.
+  
   console.log(
     `
 <cookie>
@@ -51,14 +46,3 @@ async function login(credentials: string) {
 }
 
 login(process.argv[2]);
-// const [email, password] = process.argv[2].split(':');
-// login(email, password);
-// const rl = readline.createInterface({
-//     input: process.stdin,
-//     output: process.stdout,
-// });
-
-// rl.question("Enter your password: ", async (password) => {
-//     await login(process.argv[2], password);
-//     rl.close();
-// });
